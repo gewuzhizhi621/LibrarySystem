@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{98937dbb-c5af-4927-8027-a98fc9841022}</ProjectGuid>
+    <ProjectGuid>{dce31e45-98cf-4181-8be5-1ba222dfcd5a}</ProjectGuid>
     <RootNamespace>LibrarySystem</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -102,14 +102,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)..\include;$(ProjectDir)..\EasyX\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)Easyx/include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(ProjectDir)..\EasyX\lib\VC2015\$(PlatformTarget)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>EasyXw.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)Easyx/lib/VC2015/X64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>EasyXw.lib;EasyXa.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -127,26 +126,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\book_ui.cpp" />
-    <ClCompile Include="..\src\borrow_ui.cpp" />
-    <ClCompile Include="..\src\login.cpp" />
-    <ClCompile Include="..\src\main.cpp" />
-    <ClCompile Include="..\src\reader_ui.cpp" />
-    <ClCompile Include="..\src\stat_ui.cpp" />
-    <ClCompile Include="src\book_ui.cpp" />
-    <ClCompile Include="src\reader_ui.cpp" />
+    <ClInclude Include="include\book_ui.h" />
+    <ClInclude Include="include\borrow_record.h" />
+    <ClInclude Include="include\borrow_ui.h" />
+    <ClInclude Include="include\login.h" />
+    <ClInclude Include="include\reader_ui.h" />
+    <ClInclude Include="include\stat_ui.h" />
+    <ClInclude Include="include\ui_utils.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\book_ui.h" />
-    <ClInclude Include="..\include\borrow_record.h" />
-    <ClInclude Include="..\include\borrow_ui.h" />
-    <ClInclude Include="..\include\login.h" />
-    <ClInclude Include="..\include\reader_ui.h" />
-    <ClInclude Include="..\include\stat_ui.h" />
-    <ClInclude Include="..\include\ui_utils.h" />
-    <ClInclude Include="include\book_ui.h" />
-    <ClInclude Include="include\reader_ui.h" />
-    <ClInclude Include="include\ui_utils.h" />
+    <ClCompile Include="src\book_ui.cpp" />
+    <ClCompile Include="src\borrow_ui.cpp" />
+    <ClCompile Include="src\login.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\reader_ui.cpp" />
+    <ClCompile Include="src\stat_ui.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
