@@ -159,30 +159,11 @@ LibrarySystem/
 │   └── logs.csv                 # 操作日志数据
 │
 ├── picture/                     # 程序背景图片资源
-│   ├── login.png                # 登录界面背景图
-│   └── bgImg.png                # 主菜单背景图
 │
 ├── Easyx/                       # EasyX 图形库
-│   ├── include/
-│   │   ├── easyx.h
-│   │   └── graphics.h
-│   │
-│   └── lib/
-│       └── VC2015/
-│           └── X64/
-│               ├── EasyXa.lib
-│               └── EasyXw.lib
 │
 ├── docs/                        # README 展示图片
 │   └── images/
-│       ├── login.png
-│       ├── admin_menu.png
-│       ├── book_manage.png
-│       ├── borrow_manage.png
-│       ├── reader_manage.png
-│       ├── statistics.png
-│       ├── logs.png
-│       └── reader_menu.png
 │
 ├── backup/                      # 数据备份目录，运行后自动生成
 │
@@ -197,9 +178,13 @@ LibrarySystem/
 
 系统数据统一存储在 `data/` 目录下，采用 CSV 文件进行本地持久化保存，便于查看、修改和备份。
 
-| 文件名 | `admin_accounts.csv` | `books.csv` | `readers.csv` | `borrow_records.csv` | `logs.csv` |
-|---|---|---|---|---|---|
-| 说明 | 管理员账号数据 | 图书信息数据 | 读者信息数据 | 借阅记录数据 | 操作日志数据 |
+| 文件名 | `admin_accounts.csv` | `books.csv` | `readers.csv` | `borrow_records.csv` |
+|---|---|---|---|---|
+| 说明 | 管理员账号数据 | 图书信息数据 | 读者信息数据 | 借阅记录数据 |
+
+| 文件名 | `logs.csv` |
+|---|---|
+| 说明 | 操作日志数据 |
 
 ---
 
@@ -223,9 +208,13 @@ username,password,name,role
 id,title,author,publisher,category,stock,borrowed,totalBorrowed
 ```
 
-| 字段 | id | title | author | publisher | category | stock | borrowed | totalBorrowed |
-|---|---|---|---|---|---|---|---|---|
-| 说明 | 图书编号 | 书名 | 作者 | 出版社 | 图书分类 | 库存总数 | 当前借出数量 | 累计借阅次数 |
+| 字段 | id | title | author | publisher |
+|---|---|---|---|---|
+| 说明 | 图书编号 | 书名 | 作者 | 出版社 |
+
+| 字段 | category | stock | borrowed | totalBorrowed |
+|---|---|---|---|---|
+| 说明 | 图书分类 | 库存总数 | 当前借出数量 | 累计借阅次数 |
 
 ---
 
@@ -235,9 +224,13 @@ id,title,author,publisher,category,stock,borrowed,totalBorrowed
 id,name,contact,regDate,username,password,status
 ```
 
-| 字段 | id | name | contact | regDate | username | password | status |
-|---|---|---|---|---|---|---|---|
-| 说明 | 读者编号 | 读者姓名 | 联系方式 | 注册日期 | 登录账号 | 登录密码 | 账号状态 |
+| 字段 | id | name | contact | regDate |
+|---|---|---|---|---|
+| 说明 | 读者编号 | 读者姓名 | 联系方式 | 注册日期 |
+
+| 字段 | username | password | status |
+|---|---|---|---|
+| 说明 | 登录账号 | 登录密码 | 账号状态 |
 
 账号状态说明：
 
@@ -253,9 +246,13 @@ id,name,contact,regDate,username,password,status
 bookId,bookTitle,readerId,readerName,borrowDate,dueDate,returnDate
 ```
 
-| 字段 | bookId | bookTitle | readerId | readerName | borrowDate | dueDate | returnDate |
-|---|---|---|---|---|---|---|---|
-| 说明 | 图书编号 | 图书名称 | 读者编号 | 读者姓名 | 借书日期 | 应还日期 | 归还日期，空值表示未归还 |
+| 字段 | bookId | bookTitle | readerId | readerName |
+|---|---|---|---|---|
+| 说明 | 图书编号 | 图书名称 | 读者编号 | 读者姓名 |
+
+| 字段 | borrowDate | dueDate | returnDate |
+|---|---|---|---|
+| 说明 | 借书日期 | 应还日期 | 归还日期，空值表示未归还 |
 
 ---
 
@@ -265,9 +262,13 @@ bookId,bookTitle,readerId,readerName,borrowDate,dueDate,returnDate
 time,user,role,action,detail
 ```
 
-| 字段 | time | user | role | action | detail |
-|---|---|---|---|---|---|
-| 说明 | 操作时间 | 操作用户 | 用户身份 | 操作类型 | 操作详情 |
+| 字段 | time | user | role | action |
+|---|---|---|---|---|
+| 说明 | 操作时间 | 操作用户 | 用户身份 | 操作类型 |
+
+| 字段 | detail |
+|---|---|
+| 说明 | 操作详情 |
 
 ---
 
@@ -281,7 +282,6 @@ time,user,role,action,detail
 | 2 | 将平台设置为 `x64` |
 | 3 | 将字符集设置为 `Unicode` |
 | 4 | 确保已配置 EasyX 头文件和库文件路径 |
-| 5 | 点击 `本地 Windows 调试器` 或按 `F5` 运行 |
 
 ---
 
@@ -296,11 +296,6 @@ time,user,role,action,detail
 | 附加库目录 | `$(ProjectDir)Easyx\lib\VC2015\X64` |
 | 附加依赖项 | `EasyXw.lib` |
 
-推荐使用：
-
-```text
-x64 + Unicode + EasyXw.lib
-```
 
 ---
 
@@ -344,26 +339,6 @@ x64 + Unicode + EasyXw.lib
 | 推荐设置 | `$(ProjectDir)` |
 
 ---
-
-## 📌 项目特点
-
-| 特点 | 特点 |
-|---|---|
-| 使用 C++ 实现完整业务逻辑 | 基于 EasyX 实现图形化界面 |
-| 使用 CSV 作为轻量级本地数据库 | 支持管理员和读者双身份系统 |
-| 支持图书、读者、借阅、统计、日志、备份等完整功能 | 代码采用模块化设计，结构清晰 |
-| 数据文件独立存放，便于维护和修改 | 适合课程设计、项目答辩和基础系统开发练习 |
-
----
-
-## ⚠️ 注意事项
-
-| 注意事项 | 注意事项 |
-|---|---|
-| 请确保使用 `x64` 平台运行 | 请确保 EasyX 路径配置正确 |
-| 请勿删除 `data/` 目录 | 请勿删除 `Easyx/` 目录 |
-| 程序运行时需要能够读取 CSV 文件 | 数据不更新时检查程序运行目录 |
-| 中文乱码时检查 UTF-8 编码 | 背景图片不显示时检查 `picture/` 目录 |
 
 ---
 
@@ -470,19 +445,6 @@ bgImg.png
 | CSV 编码 | UTF-8 with BOM |
 | 运行平台 | x64 |
 | 调试工作目录 | `$(ProjectDir)` |
-
----
-
-## 🌟 后续可扩展方向
-
-| 扩展方向 | 扩展方向 |
-|---|---|
-| 增加 SQLite 或 MySQL 数据库支持 | 增加读者注册功能 |
-| 增加图书封面展示 | 增加 ISBN 图书录入 |
-| 增加管理员权限分级 | 增加数据导入导出功能 |
-| 增加更多统计图表 | 增加深色模式或主题切换 |
-| 增加更加完善的异常处理机制 | 增加日志搜索和筛选功能 |
-| 增加图书借阅排行榜导出功能 | 增加数据恢复功能 |
 
 ---
 
