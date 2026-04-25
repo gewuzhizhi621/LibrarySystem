@@ -1,116 +1,330 @@
-﻿#include "login.h"
+#include "login.h"
 #include "ui_utils.h"
-#include <map>
+#include "borrow_ui.h"
+#include "log_ui.h"
+#include "reader_ui.h"
 
-static std::map<std::string, std::string> adminMap;
+#include <cstdlib>
+#include <ctime>
+#include <fstream>
+#include <sstream>
+#include <string>
 
-static void LoadAdmins() {
-    std::ifstream fin("data/admin_accounts.csv");
-    if (!fin) return;
-    std::string line;
-    std::getline(fin, line);
-    while (std::getline(fin, line)) {
-        std::stringstream ss(line);
-        std::string u, p;
-        std::getline(ss, u, ',');
-        std::getline(ss, p, ',');
-        adminMap[u] = p;
+extern void mainMenu(bool isAdmin, int readerId, const std::string& userName, const std::string& roleName);
+
+struct LoginInput {
+    int x;
+    int y;
+    int w;
+    int h;
+    std::wstring text;
+    std::wstring placeholder;
+    bool active = false;
+    bool password = false;
+};
+
+struct LoginRole {
+    int x;
+    int y;
+    int w;
+    int h;
+    int selected = 0;
+};
+
+static IMAGE g_loginBg;
+static bool g_hasLoginBg = false;
+
+static void LoadLoginBg() {
+    if (std::filesystem::exists("picture/login.png")) {
+        loadimage(&g_loginBg, L"picture/login.png", WIN_W, WIN_H);
+        g_hasLoginBg = true;
+    }
+    else {
+        g_hasLoginBg = false;
     }
 }
 
-static void SaveAdmin(const std::string& u, const std::string& p) {
-    adminMap[u] = p;
-    std::ofstream fout("data/admin_accounts.csv");
-    fout << "username,password\n";
-    for (const auto& kv : adminMap) fout << kv.first << "," << kv.second << '\n';
+static bool CheckAdminLogin(
+    const std::wstring& username,
+    const std::wstring& password,
+    std::string& name,
+    std::string& role
+) {
+    std::ifstream fin("data/admin_accounts.csv");
+
+    if (!fin) {
+        return false;
+    }
+
+    std::string line;
+    std::getline(fin, line);
+
+    std::string inputUser = ws2s(username);
+    std::string inputPassword = ws2s(password);
+
+    while (std::getline(fin, line)) {
+        if (line.empty()) {
+            continue;
+        }
+
+        std::stringstream ss(line);
+        std::string user;
+        std::string pwd;
+        std::string realName;
+        std::string realRole;
+
+        std::getline(ss, user, ',');
+        std::getline(ss, pwd, ',');
+        std::getline(ss, realName, ',');
+        std::getline(ss, realRole, ',');
+
+        if (user == inputUser && pwd == inputPassword) {
+            name = realName.empty() ? user : realName;
+            role = realRole.empty() ? "admin" : realRole;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static bool CheckReaderLogin(
+    const std::wstring& username,
+    const std::wstring& password,
+    int& readerId,
+    std::string& name
+) {
+    LoadReaders();
+    std::string inputUser = ws2s(username);
+    std::string inputPassword = ws2s(password);
+
+    for (const auto& reader : g_readers) {
+        if (reader.username == inputUser && reader.password == inputPassword && reader.status != "disabled") {
+            readerId = reader.id;
+            name = reader.name;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static void DrawInput(const LoginInput& input) {
+    setfillcolor(input.active ? RGB(245, 250, 255) : WHITE);
+    setlinecolor(input.active ? CLR_PRIMARY : RGB(205, 215, 230));
+    solidroundrect(input.x, input.y, input.x + input.w, input.y + input.h, 10, 10);
+    roundrect(input.x, input.y, input.x + input.w, input.y + input.h, 10, 10);
+
+    std::wstring show = input.text.empty()
+        ? input.placeholder
+        : (input.password ? std::wstring(input.text.size(), L'*') : input.text);
+
+    settextcolor(input.text.empty() ? RGB(160, 165, 175) : CLR_TEXT_DARK);
+    setbkmode(TRANSPARENT);
+    settextstyle_w(20, 0, L"微软雅黑");
+    outtextxy_w(input.x + 15, input.y + 13, show);
+
+    if (input.active && clock() % 1000 < 500) {
+        int cx = input.x + 15 + textwidth_w(show);
+        setlinecolor(CLR_TEXT_DARK);
+        line(cx, input.y + 10, cx, input.y + input.h - 10);
+    }
+}
+
+static void DrawLoginPage(
+    const LoginInput& username,
+    const LoginInput& password,
+    const LoginRole& role,
+    const std::wstring& tip
+) {
+    if (g_hasLoginBg) {
+        putimage(0, 0, &g_loginBg);
+    }
+    else {
+        GradientRect(0, 0, WIN_W, WIN_H, RGB(230, 240, 255), RGB(245, 248, 252));
+        setbkmode(TRANSPARENT);
+        settextcolor(RGB(70, 115, 180));
+        settextstyle_w(46, 0, L"微软雅黑");
+        outtextxy_w(110, 160, L"Library System");
+        settextstyle_w(24, 0, L"微软雅黑");
+        outtextxy_w(115, 230, L"图书管理系统课程设计");
+    }
+
+    setfillcolor(WHITE);
+    setlinecolor(RGB(220, 230, 245));
+    solidroundrect(660, 105, 1035, 650, 28, 28);
+    roundrect(660, 105, 1035, 650, 28, 28);
+
+    setbkmode(TRANSPARENT);
+    settextcolor(RGB(35, 75, 130));
+    settextstyle_w(36, 0, L"微软雅黑");
+    outtextxy_w(745, 155, L"图书管理系统");
+
+    settextcolor(RGB(135, 150, 170));
+    settextstyle_w(18, 0, L"微软雅黑");
+    outtextxy_w(765, 205, L"EasyX + CSV Version");
+
+    settextcolor(CLR_TEXT_DARK);
+    settextstyle_w(18, 0, L"微软雅黑");
+    outtextxy_w(705, 252, L"用户名");
+    DrawInput(username);
+    outtextxy_w(705, 332, L"密码");
+    DrawInput(password);
+    outtextxy_w(705, 412, L"身份");
+
+    setfillcolor(WHITE);
+    setlinecolor(RGB(205, 215, 230));
+    solidroundrect(role.x, role.y, role.x + role.w, role.y + role.h, 10, 10);
+    roundrect(role.x, role.y, role.x + role.w, role.y + role.h, 10, 10);
+
+    settextstyle_w(20, 0, L"微软雅黑");
+    settextcolor(CLR_TEXT_DARK);
+    outtextxy_w(role.x + 15, role.y + 13, role.selected == 0 ? L"管理员" : L"读者");
+
+    settextcolor(CLR_TEXT_LIGHT);
+    settextstyle_w(16, 0, L"微软雅黑");
+    outtextxy_w(role.x + role.w - 90, role.y + 15, L"点击切换");
+
+    if (!tip.empty()) {
+        settextcolor(CLR_DANGER);
+        settextstyle_w(17, 0, L"微软雅黑");
+        outtextxy_w(705, 493, tip);
+    }
+
+    DrawButton(705, 520, 280, 48, L"登录系统");
+    DrawButton(705, 585, 125, 38, L"重置");
+    DrawButton(860, 585, 125, 38, L"退出");
+}
+
+static void ShowOverdueIfNeeded(int readerId) {
+    ReloadBorrows();
+
+    int count = 0;
+    time_t now = time(nullptr);
+
+    for (const auto& br : g_borrows) {
+        if (br.readerId == readerId && br.returnDate == 0 && br.dueDate < now) {
+            count++;
+        }
+    }
+
+    if (count > 0) {
+        std::wstring text = L"你有 " + std::to_wstring(count) + L" 本图书已逾期，请尽快归还！";
+        MessageBoxW(GetHWnd(), text.c_str(), L"逾期提醒", MB_OK | MB_ICONWARNING);
+    }
+}
+
+static void TryLogin(LoginInput& username, LoginInput& password, LoginRole& role, std::wstring& tip) {
+    if (username.text.empty() || password.text.empty()) {
+        tip = L"用户名和密码不能为空";
+        return;
+    }
+
+    bool isAdmin = role.selected == 0;
+    int readerId = -1;
+    bool ok = false;
+    std::string name;
+    std::string roleName;
+
+    if (isAdmin) {
+        ok = CheckAdminLogin(username.text, password.text, name, roleName);
+    }
+    else {
+        roleName = "reader";
+        ok = CheckReaderLogin(username.text, password.text, readerId, name);
+    }
+
+    if (!ok) {
+        tip = L"账号、密码或身份选择错误，或账号已停用";
+        return;
+    }
+
+    AddLog(ws2s(username.text), roleName, "登录", "success");
+    MessageBoxW(GetHWnd(), L"登录成功！", L"提示", MB_OK | MB_ICONINFORMATION);
+
+    if (!isAdmin) {
+        ShowOverdueIfNeeded(readerId);
+    }
+
+    mainMenu(isAdmin, readerId, ws2s(username.text), roleName);
 }
 
 void loginMain() {
+    EnsureBaseDataFiles();
     EnsureGraphInitialized();
-    // 加载右上角校徽
-    IMAGE logoImg;
-    IMAGE logoSmall;
-    bool hasLogo = false;
-    int logoW = 0, logoH = 0;
-    std::ifstream lf("picture/logoImg.jpg");
-    if (lf) {
-        lf.close();
-        // 先加载原图获取尺寸
-        loadimage(&logoImg, L"picture/logoImg.jpg");
-        logoW = logoImg.getwidth();
-        logoH = logoImg.getheight();
-        // 按原尺寸的 1/3 重新加载缩放图
-        int sw = logoW / 2; if (sw < 1) sw = 1;
-        int sh = logoH / 2; if (sh < 1) sh = 1;
-        loadimage(&logoSmall, L"picture/logoImg.jpg", sw, sh);
-        hasLogo = true;
-    }
-    SetWindowTextW(GetHWnd(), L"图书馆系统 - 登录");
-    LoadAdmins();
-    std::wstring user, pwd;
-    int active = 0; // 0-username,1-password
-    std::vector<int> cursors(2, 0);
-    int mode = 0; // 0-login, 1-register
-    std::wstring msg;
-    ExMessage m;
+    SetWindowTextW(GetHWnd(), L"登录 - 图书管理系统");
+    LoadLoginBg();
+
+    LoginInput username{ 705, 280, 280, 46, L"", L"请输入用户名", false, false };
+    LoginInput password{ 705, 360, 280, 46, L"", L"请输入密码", false, true };
+    LoginRole role{ 705, 440, 280, 46, 0 };
+    std::wstring tip;
+    ExMessage msg;
 
     while (true) {
-        BeginBatchDraw();
-        setbkcolor(CLR_BG);
-        cleardevice();
-        settextstyle(40, 0, L"微软雅黑");
-        settextcolor(CLR_PRIMARY);
-        outtextxy(380, 80, L"图书管理系统");
-        settextstyle(20, 0, L"微软雅黑");
-        settextcolor(CLR_TEXT_DARK);
-        outtextxy(350, 180, L"用户名:");
-        DrawInputBox(450, 175, 260, 40, user, active == 0, cursors[0]);
-        outtextxy(350, 250, L"密  码:");
-        DrawInputBox(450, 245, 260, 40, pwd, active == 1, cursors[1]);
-        DrawButton(420, 340, 120, 45, mode == 0 ? L"登录" : L"注册");
-        DrawButton(560, 340, 120, 45, L"切换注册");
-        if (!msg.empty()) {
-            settextcolor(RED);
-            outtextxy(450, 420, msg.c_str());
-        }
-        // 绘制右上角校徽（如果加载成功）
-        if (hasLogo) {
-            int sw = logoSmall.getwidth();
-            int sh = logoSmall.getheight();
-            putimage(WIN_W - sw - 20, 20, &logoSmall);
-        }
-        EndBatchDraw();
+        while (peekmessage(&msg, EX_MOUSE | EX_CHAR, true)) {
+            if (msg.message == WM_LBUTTONDOWN) {
+                username.active = PtInRect(msg.x, msg.y, username.x, username.y, username.w, username.h);
+                password.active = PtInRect(msg.x, msg.y, password.x, password.y, password.w, password.h);
 
-        m = getmessage(EX_CHAR | EX_KEY | EX_MOUSE);
-        if (m.message == WM_LBUTTONDOWN) {
-            int x = m.x, y = m.y;
-            if (PtInRect(x, y, 450, 175, 260, 40)) active = 0;
-            else if (PtInRect(x, y, 450, 245, 260, 40)) active = 1;
-            else if (PtInRect(x, y, 420, 340, 120, 45)) {
-                std::string u = ws2s(user), p = ws2s(pwd);
-                if (mode == 0) {
-                    if (adminMap.count(u) && adminMap[u] == p) {
-                        extern void mainMenu();
-                        mainMenu();
-                        return;
+                if (PtInRect(msg.x, msg.y, role.x, role.y, role.w, role.h)) {
+                    role.selected = 1 - role.selected;
+                    tip.clear();
+                }
+
+                if (PtInRect(msg.x, msg.y, 705, 520, 280, 48)) {
+                    TryLogin(username, password, role, tip);
+                }
+
+                if (PtInRect(msg.x, msg.y, 705, 585, 125, 38)) {
+                    username.text.clear();
+                    password.text.clear();
+                    tip.clear();
+                    username.active = false;
+                    password.active = false;
+                    role.selected = 0;
+                }
+
+                if (PtInRect(msg.x, msg.y, 860, 585, 125, 38)) {
+                    closegraph();
+                    exit(0);
+                }
+            }
+
+            if (msg.message == WM_CHAR) {
+                LoginInput* activeInput = nullptr;
+
+                if (username.active) {
+                    activeInput = &username;
+                }
+
+                if (password.active) {
+                    activeInput = &password;
+                }
+
+                if (activeInput != nullptr) {
+                    wchar_t ch = static_cast<wchar_t>(msg.ch);
+
+                    if (ch == L'\b') {
+                        if (!activeInput->text.empty()) {
+                            activeInput->text.pop_back();
+                        }
                     }
-                    else msg = L"用户名或密码错误";
-                }
-                else {
-                    if (adminMap.count(u)) msg = L"用户名已存在";
-                    else { SaveAdmin(u, p); msg = L"注册成功，请登录"; mode = 0; }
+                    else if (ch == L'\r') {
+                        TryLogin(username, password, role, tip);
+                    }
+                    else if (ch >= 32) {
+                        activeInput->text.push_back(ch);
+                    }
+
+                    tip.clear();
                 }
             }
-            else if (PtInRect(x, y, 560, 340, 120, 45)) {
-                mode = !mode; msg.clear(); user.clear(); pwd.clear(); cursors = { 0,0 };
-            }
         }
-        else if (m.message == WM_CHAR && active >= 0) {
-            wchar_t ch = m.ch;
-            auto& buf = (active == 0) ? user : pwd;
-            auto& cp = cursors[active];
-            if (ch == '\b') { if (!buf.empty()) { buf.pop_back(); if (cp) --cp; } }
-            else if (ch >= 32) { buf += ch; ++cp; }
-        }
+
+        BeginBatchDraw();
+        DrawLoginPage(username, password, role, tip);
+        EndBatchDraw();
+        Sleep(10);
     }
 }

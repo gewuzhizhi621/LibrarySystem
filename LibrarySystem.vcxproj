@@ -103,6 +103,8 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)include;$(ProjectDir)Easyx/include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -130,6 +132,7 @@
     <ClInclude Include="include\borrow_record.h" />
     <ClInclude Include="include\borrow_ui.h" />
     <ClInclude Include="include\login.h" />
+    <ClInclude Include="include\log_ui.h" />
     <ClInclude Include="include\reader_ui.h" />
     <ClInclude Include="include\stat_ui.h" />
     <ClInclude Include="include\ui_utils.h" />
@@ -138,6 +141,7 @@
     <ClCompile Include="src\book_ui.cpp" />
     <ClCompile Include="src\borrow_ui.cpp" />
     <ClCompile Include="src\login.cpp" />
+    <ClCompile Include="src\log_ui.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\reader_ui.cpp" />
     <ClCompile Include="src\stat_ui.cpp" />

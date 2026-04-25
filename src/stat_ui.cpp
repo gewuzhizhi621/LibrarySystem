@@ -1,172 +1,246 @@
-﻿#include "stat_ui.h"
+#include "stat_ui.h"
+#include "book_ui.h"
+#include "borrow_ui.h"
+#include "reader_ui.h"
 #include "ui_utils.h"
-#include "borrow_record.h"
-#include "book_ui.h"          // 使用 Book、g_books、LoadBooks
-#include "reader_ui.h"        // 使用 Reader、g_readers（虽未直接用，但保留以备后用）
-#include <chrono>
-#include <map>
+
 #include <algorithm>
+#include <ctime>
+#include <map>
+#include <vector>
 
-// 外部依赖（定义在 borrow_ui.cpp 中）
-extern std::vector<BorrowRecord> g_borrows;
-extern void ReloadBorrows();
+struct RankItem {
+    int bookId = 0;
+    std::wstring title;
+    int count = 0;
+};
 
-// ---------- 借阅排行榜界面 ----------
-static void ShowRanking() {
-    LoadBooks();
-    ReloadBorrows();
+static int CountBorrowing() {
+    int count = 0;
 
-    std::map<int, int> borrowCount;
-    std::map<int, std::string> bookTitleMap;
-    for (const auto& b : g_books) bookTitleMap[b.id] = b.title;
-    for (const auto& br : g_borrows) borrowCount[br.bookId]++;
+    for (const auto& br : g_borrows) {
+        if (br.returnDate == 0) {
+            count++;
+        }
+    }
 
-    std::vector<std::pair<int, int>> rankVec(borrowCount.begin(), borrowCount.end());
-    std::sort(rankVec.begin(), rankVec.end(),
-        [](const auto& a, const auto& b) { return a.second > b.second; });
+    return count;
+}
 
-    int page = 0;
-    int totalPage = (rankVec.size() + PAGE_SIZE - 1) / PAGE_SIZE;
-    if (totalPage == 0) totalPage = 1;
-    ExMessage m;
+static int CountOverdue() {
+    int count = 0;
+    time_t now = time(nullptr);
 
-    while (true) {
-        BeginBatchDraw();
-        setbkcolor(CLR_BG);
-        cleardevice();
-        DrawButton(20, 20, 100, 40, L"← 返回");
-        settextstyle(28, 0, L"微软雅黑");
-        settextcolor(CLR_PRIMARY);
-        outtextxy(400, 30, L"📈 图书借阅排行榜");
+    for (const auto& br : g_borrows) {
+        if (br.returnDate == 0 && br.dueDate < now) {
+            count++;
+        }
+    }
 
-        std::vector<std::wstring> headers = { L"排名", L"图书ID", L"书名", L"借阅次数" };
-        std::vector<int> widths = { 80, 100, 350, 120 };
-        DrawTableHeader(30, 100, headers, widths);
+    return count;
+}
 
-        int start = page * PAGE_SIZE;
-        for (int i = 0; i < PAGE_SIZE && start + i < (int)rankVec.size(); ++i) {
-            int bookId = rankVec[start + i].first;
-            int count = rankVec[start + i].second;
-            int y = 100 + ROW_H * (i + 1);
-            int curX = 30;
-            for (size_t j = 0; j < widths.size(); ++j) {
-                DrawRoundedRect(curX, y, curX + widths[j], y + ROW_H, 0, WHITE, CLR_TEXT_LIGHT);
-                curX += widths[j];
-            }
-            setbkmode(TRANSPARENT);
-            settextcolor(CLR_TEXT_DARK);
-            settextstyle(18, 0, L"微软雅黑");
-            curX = 30;
-            outtextxy(curX + 10, y + 8, std::to_wstring(start + i + 1).c_str()); curX += widths[0];
-            outtextxy(curX + 10, y + 8, std::to_wstring(bookId).c_str()); curX += widths[1];
-            outtextxy(curX + 10, y + 8, s2ws(bookTitleMap[bookId]).c_str()); curX += widths[2];
-            outtextxy(curX + 10, y + 8, std::to_wstring(count).c_str());
+static int CountTotalStock() {
+    int total = 0;
+
+    for (const auto& book : g_books) {
+        total += book.stock;
+    }
+
+    return total;
+}
+
+static std::vector<RankItem> GetRanking() {
+    std::vector<RankItem> rank;
+
+    for (const auto& book : g_books) {
+        if (book.totalBorrowed > 0) {
+            RankItem item;
+            item.bookId = book.id;
+            item.title = s2ws(book.title);
+            item.count = book.totalBorrowed;
+            rank.push_back(item);
+        }
+    }
+
+    std::sort(rank.begin(), rank.end(), [](const RankItem& a, const RankItem& b) {
+        return a.count > b.count;
+    });
+
+    return rank;
+}
+
+static void DrawCard(
+    int x,
+    int y,
+    int width,
+    int height,
+    const std::wstring& title,
+    const std::wstring& value,
+    COLORREF color
+) {
+    setfillcolor(WHITE);
+    setlinecolor(RGB(220, 230, 245));
+    solidroundrect(x, y, x + width, y + height, 16, 16);
+    roundrect(x, y, x + width, y + height, 16, 16);
+
+    setfillcolor(color);
+    solidroundrect(x, y, x + 10, y + height, 10, 10);
+
+    setbkmode(TRANSPARENT);
+    settextcolor(CLR_TEXT_LIGHT);
+    settextstyle_w(18, 0, L"微软雅黑");
+    outtextxy_w(x + 28, y + 18, title);
+
+    settextcolor(color);
+    settextstyle_w(34, 0, L"微软雅黑");
+    outtextxy_w(x + 28, y + 55, value);
+}
+
+static void DrawBarChart(int x, int y, int width, int height, const std::vector<RankItem>& rank) {
+    setfillcolor(WHITE);
+    setlinecolor(RGB(220, 230, 245));
+    solidroundrect(x, y, x + width, y + height, 18, 18);
+    roundrect(x, y, x + width, y + height, 18, 18);
+
+    setbkmode(TRANSPARENT);
+    settextcolor(CLR_PRIMARY);
+    settextstyle_w(24, 0, L"微软雅黑");
+    outtextxy_w(x + 25, y + 20, L"热门图书柱状图 TOP 5");
+
+    if (rank.empty()) {
+        settextcolor(CLR_TEXT_LIGHT);
+        outtextxy_w(x + 25, y + 85, L"暂无借阅数据");
+        return;
+    }
+
+    int topN = (std::min)(5, static_cast<int>(rank.size()));
+    int maxCount = 1;
+
+    for (const auto& item : rank) {
+        maxCount = (std::max)(maxCount, item.count);
+    }
+
+    int baseX = x + 80;
+    int baseY = y + height - 55;
+    int chartHeight = height - 130;
+    int barWidth = 55;
+    int gap = 45;
+
+    setlinecolor(RGB(180, 190, 205));
+    line(baseX - 20, baseY, baseX + topN * (barWidth + gap), baseY);
+    line(baseX - 20, baseY, baseX - 20, baseY - chartHeight);
+
+    for (int i = 0; i < topN; ++i) {
+        int barHeight = rank[i].count * chartHeight / maxCount;
+        int bx = baseX + i * (barWidth + gap);
+        int by = baseY - barHeight;
+
+        setfillcolor(CLR_PRIMARY);
+        solidroundrect(bx, by, bx + barWidth, baseY, 8, 8);
+
+        std::wstring countText = std::to_wstring(rank[i].count);
+        settextcolor(CLR_TEXT_DARK);
+        settextstyle_w(16, 0, L"微软雅黑");
+        outtextxy_w(bx + (barWidth - textwidth_w(countText)) / 2, by - 25, countText);
+
+        std::wstring name = rank[i].title;
+
+        if (name.size() > 5) {
+            name = name.substr(0, 5) + L"...";
         }
 
-        DrawPagination(30, WIN_H - 50, page, totalPage);
-        EndBatchDraw();
-
-        m = getmessage(EX_MOUSE);
-        if (m.message == WM_LBUTTONDOWN) {
-            int x = m.x, y = m.y;
-            if (PtInRect(x, y, 20, 20, 100, 40)) return;
-            int pageBtnX = 30 + 150, pageBtnY = WIN_H - 58;
-            if (PtInRect(x, y, pageBtnX, pageBtnY, 80, 30) && page > 0) --page;
-            if (PtInRect(x, y, pageBtnX + 90, pageBtnY, 80, 30) && (page + 1) < totalPage) ++page;
-        }
+        settextcolor(CLR_TEXT_LIGHT);
+        settextstyle_w(14, 0, L"微软雅黑");
+        outtextxy_w(bx + (barWidth - textwidth_w(name)) / 2, baseY + 10, name);
     }
 }
 
-// ---------- 到期未还界面 ----------
-static void ShowOverdue() {
-    ReloadBorrows();
-    time_t now = std::time(nullptr);
-    std::vector<BorrowRecord> overdue;
-    for (const auto& br : g_borrows)
-        if (br.returnDate == 0 && br.dueDate < now)
-            overdue.push_back(br);
+static void DrawOverdueList(int x, int y, int width, int height) {
+    setfillcolor(WHITE);
+    setlinecolor(RGB(220, 230, 245));
+    solidroundrect(x, y, x + width, y + height, 18, 18);
+    roundrect(x, y, x + width, y + height, 18, 18);
 
-    int page = 0;
-    int totalPage = (overdue.size() + PAGE_SIZE - 1) / PAGE_SIZE;
-    if (totalPage == 0) totalPage = 1;
-    ExMessage m;
+    setbkmode(TRANSPARENT);
+    settextcolor(CLR_DANGER);
+    settextstyle_w(24, 0, L"微软雅黑");
+    outtextxy_w(x + 25, y + 20, L"逾期清单");
 
-    while (true) {
-        BeginBatchDraw();
-        setbkcolor(CLR_BG);
-        cleardevice();
+    std::vector<BorrowRecord> overdueList;
+    time_t now = time(nullptr);
 
-        DrawButton(20, 20, 100, 40, L"← 返回");
-        settextstyle(28, 0, L"微软雅黑");
-        settextcolor(CLR_ACCENT);
-        outtextxy(380, 30, L"⚠️ 逾期未还图书");
-
-        std::vector<std::wstring> headers = { L"图书ID", L"书名", L"读者", L"应还日期", L"逾期天数" };
-        std::vector<int> widths = { 80, 280, 180, 150, 100 };
-        DrawTableHeader(30, 100, headers, widths);
-
-        int start = page * PAGE_SIZE;
-        for (int i = 0; i < PAGE_SIZE && start + i < (int)overdue.size(); ++i) {
-            const BorrowRecord& br = overdue[start + i];
-            int y = 100 + ROW_H * (i + 1);
-            int curX = 30;
-            for (size_t j = 0; j < widths.size(); ++j) {
-                DrawRoundedRect(curX, y, curX + widths[j], y + ROW_H, 0, WHITE, CLR_TEXT_LIGHT);
-                curX += widths[j];
-            }
-            setbkmode(TRANSPARENT);
-            settextcolor(CLR_TEXT_DARK);
-            settextstyle(18, 0, L"微软雅黑");
-            curX = 30;
-            outtextxy(curX + 5, y + 8, std::to_wstring(br.bookId).c_str()); curX += widths[0];
-            outtextxy(curX + 5, y + 8, s2ws(br.bookTitle).c_str()); curX += widths[1];
-            outtextxy(curX + 5, y + 8, s2ws(br.readerName).c_str()); curX += widths[2];
-            outtextxy(curX + 5, y + 8, timeToWstring(br.dueDate).c_str()); curX += widths[3];
-            int days = (now - br.dueDate) / (24 * 3600);
-            outtextxy(curX + 5, y + 8, (std::to_wstring(days) + L" 天").c_str());
+    for (const auto& br : g_borrows) {
+        if (br.returnDate == 0 && br.dueDate < now) {
+            overdueList.push_back(br);
         }
+    }
 
-        DrawPagination(30, WIN_H - 50, page, totalPage);
-        EndBatchDraw();
+    if (overdueList.empty()) {
+        settextcolor(CLR_TEXT_LIGHT);
+        settextstyle_w(18, 0, L"微软雅黑");
+        outtextxy_w(x + 25, y + 80, L"暂无逾期记录");
+        return;
+    }
 
-        m = getmessage(EX_MOUSE);
-        if (m.message == WM_LBUTTONDOWN) {
-            int x = m.x, y = m.y;
-            if (PtInRect(x, y, 20, 20, 100, 40)) return;
-            int pageBtnX = 30 + 150, pageBtnY = WIN_H - 58;
-            if (PtInRect(x, y, pageBtnX, pageBtnY, 80, 30) && page > 0) --page;
-            if (PtInRect(x, y, pageBtnX + 90, pageBtnY, 80, 30) && (page + 1) < totalPage) ++page;
-        }
+    std::sort(overdueList.begin(), overdueList.end(), [](const BorrowRecord& a, const BorrowRecord& b) {
+        return a.dueDate < b.dueDate;
+    });
+
+    int showCount = (std::min)(8, static_cast<int>(overdueList.size()));
+
+    settextcolor(CLR_TEXT_DARK);
+    settextstyle_w(15, 0, L"微软雅黑");
+
+    for (int i = 0; i < showCount; ++i) {
+        const auto& br = overdueList[i];
+        std::wstring lineText = std::to_wstring(i + 1) + L". " + s2ws(br.readerName) + L" - " + s2ws(br.bookTitle) + L" / " + timeToWstring(br.dueDate);
+        outtextxy_w(x + 25, y + 70 + i * 32, lineText);
     }
 }
 
-// ---------- 统计分析主菜单 ----------
 void statUIMain() {
     EnsureGraphInitialized();
-    SetWindowTextW(GetHWnd(), L"统计分析 - 图书馆系统");
+    EnsureBaseDataFiles();
+    SetWindowTextW(GetHWnd(), L"DUT Library System - 数据统计中心");
+
     ExMessage m;
 
     while (true) {
+        LoadBooks();
+        LoadReaders();
+        ReloadBorrows();
+
+        int totalBooks = static_cast<int>(g_books.size());
+        int totalStock = CountTotalStock();
+        int totalReaders = static_cast<int>(g_readers.size());
+        int borrowing = CountBorrowing();
+        int overdue = CountOverdue();
+        auto rank = GetRanking();
+
         BeginBatchDraw();
         setbkcolor(CLR_BG);
         cleardevice();
+        DrawTitle(L"数据统计中心");
+        DrawBackButton(20, 86);
+        DrawButton(980, 86, 90, 38, L"刷新", true, CLR_SUCCESS);
 
-        DrawButton(20, 20, 100, 40, L"← 返回");
-        settextstyle(32, 0, L"微软雅黑");
-        settextcolor(CLR_PRIMARY);
-        outtextxy(380, 100, L"统计分析功能");
+        DrawCard(40, 150, 185, 95, L"图书种类", std::to_wstring(totalBooks), CLR_PRIMARY);
+        DrawCard(245, 150, 185, 95, L"库存总量", std::to_wstring(totalStock), RGB(90, 130, 220));
+        DrawCard(450, 150, 185, 95, L"读者总数", std::to_wstring(totalReaders), CLR_SUCCESS);
+        DrawCard(655, 150, 185, 95, L"当前借出", std::to_wstring(borrowing), CLR_WARNING);
+        DrawCard(860, 150, 185, 95, L"逾期", std::to_wstring(overdue), CLR_DANGER);
 
-        DrawButton(350, 220, 300, 60, L"借阅排行榜");
-        DrawButton(350, 320, 300, 60, L"逾期未还清单");
-
+        DrawBarChart(40, 275, 640, 355, rank);
+        DrawOverdueList(710, 275, 340, 355);
         EndBatchDraw();
 
         m = getmessage(EX_MOUSE);
+
         if (m.message == WM_LBUTTONDOWN) {
-            int x = m.x, y = m.y;
-            if (PtInRect(x, y, 20, 20, 100, 40)) return;
-            if (PtInRect(x, y, 350, 220, 300, 60)) { ShowRanking(); }
-            if (PtInRect(x, y, 350, 320, 300, 60)) { ShowOverdue(); }
+            if (PtInRect(m.x, m.y, 20, 86, 105, 40)) {
+                return;
+            }
         }
     }
 }
