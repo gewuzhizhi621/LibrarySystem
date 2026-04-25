@@ -20,24 +20,51 @@
 
 ## 🖼️ 项目界面展示
 
-> 建议将项目截图放在 `docs/images/` 目录下。  
-> 图片文件名建议使用英文，不要使用中文、空格或特殊符号。
+> 建议所有截图统一放在 `docs/images/` 目录下。  
+> 为了页面美观，建议截图尽量保持相同窗口比例，例如 `1100 × 750`。
 
-| 登录界面 | 管理员主界面 |
-|---|---|
-| ![登录界面](docs/images/login.png) | ![管理员主界面](docs/images/admin_menu.png) |
-
-| 图书管理 | 借阅管理 |
-|---|---|
-| ![图书管理](docs/images/book_manage.png) | ![借阅管理](docs/images/borrow_manage.png) |
-
-| 读者管理 | 数据统计中心 |
-|---|---|
-| ![读者管理](docs/images/reader_manage.png) | ![数据统计中心](docs/images/statistics.png) |
-
-| 操作日志 | 读者服务中心 |
-|---|---|
-| ![操作日志](docs/images/logs.png) | ![读者服务中心](docs/images/reader_menu.png) |
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <b>登录界面</b><br>
+      <img src="docs/images/login.png" width="480">
+    </td>
+    <td align="center" width="50%">
+      <b>管理员主界面</b><br>
+      <img src="docs/images/admin_menu.png" width="480">
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <b>图书管理</b><br>
+      <img src="docs/images/book_manage.png" width="480">
+    </td>
+    <td align="center" width="50%">
+      <b>借阅管理</b><br>
+      <img src="docs/images/borrow_manage.png" width="480">
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <b>读者管理</b><br>
+      <img src="docs/images/reader_manage.png" width="480">
+    </td>
+    <td align="center" width="50%">
+      <b>数据统计中心</b><br>
+      <img src="docs/images/statistics.png" width="480">
+    </td>
+  </tr>
+  <tr>
+    <td align="center" width="50%">
+      <b>操作日志</b><br>
+      <img src="docs/images/logs.png" width="480">
+    </td>
+    <td align="center" width="50%">
+      <b>读者服务中心</b><br>
+      <img src="docs/images/reader_menu.png" width="480">
+    </td>
+  </tr>
+</table>
 
 ---
 
