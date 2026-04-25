@@ -116,22 +116,15 @@
 ### 💾 数据备份
 
 - **备份功能：** 一键备份 CSV 数据文件、自动创建 backup 目录、便于恢复历史数据
+
 ---
 
 ## 🛠️ 开发环境
 
-本项目使用 **C++17** 开发，基于 **EasyX 图形库** 实现图形化界面，推荐在 **Visual Studio 2022 + Windows x64** 环境下运行。
+| 配置项 | 编程语言 | C++ 标准 | 开发工具 | 图形库 | 数据存储 | 操作系统 | 推荐平台 | 推荐字符集 |
+|---|---|---|---|---|---|---|---|---|
+| 说明 | C++ | C++17 | Visual Studio 2022 | EasyX | CSV 文件 | Windows 10 / Windows 11 | x64 | Unicode |
 
-<p>
-  <kbd>C++</kbd>
-  <kbd>C++17</kbd>
-  <kbd>Visual Studio 2022</kbd>
-  <kbd>EasyX</kbd>
-  <kbd>CSV 文件存储</kbd>
-  <kbd>Windows 10 / 11</kbd>
-  <kbd>x64</kbd>
-  <kbd>Unicode</kbd>
-</p>
 ---
 
 ## 📂 项目结构
