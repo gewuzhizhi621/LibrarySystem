@@ -195,15 +195,11 @@ LibrarySystem/
 
 ## 📊 数据文件说明
 
-所有数据均存储在 `data/` 目录下的 CSV 文件中。
+系统数据统一存储在 `data/` 目录下，采用 CSV 文件进行本地持久化保存，便于查看、修改和备份。
 
-| 文件名 | 说明 |
-|---|---|
-| `admin_accounts.csv` | 管理员账号数据 |
-| `books.csv` | 图书信息数据 |
-| `readers.csv` | 读者信息数据 |
-| `borrow_records.csv` | 借阅记录数据 |
-| `logs.csv` | 操作日志数据 |
+| 文件名 | `admin_accounts.csv` | `books.csv` | `readers.csv` | `borrow_records.csv` | `logs.csv` |
+|---|---|---|---|---|---|
+| 说明 | 管理员账号数据 | 图书信息数据 | 读者信息数据 | 借阅记录数据 | 操作日志数据 |
 
 ---
 
@@ -215,10 +211,9 @@ LibrarySystem/
 username,password,name,role
 ```
 
-| 字段 | 说明 | 字段 | 说明 |
-|---|---|---|---|
-| username | 管理员账号 | password | 管理员密码 |
-| name | 管理员名称 | role | 用户角色 |
+| 字段 | username | password | name | role |
+|---|---|---|---|---|
+| 说明 | 管理员账号 | 管理员密码 | 管理员名称 | 用户角色 |
 
 ---
 
@@ -228,12 +223,9 @@ username,password,name,role
 id,title,author,publisher,category,stock,borrowed,totalBorrowed
 ```
 
-| 字段 | 说明 | 字段 | 说明 |
-|---|---|---|---|
-| id | 图书编号 | title | 书名 |
-| author | 作者 | publisher | 出版社 |
-| category | 图书分类 | stock | 库存总数 |
-| borrowed | 当前借出数量 | totalBorrowed | 累计借阅次数 |
+| 字段 | id | title | author | publisher | category | stock | borrowed | totalBorrowed |
+|---|---|---|---|---|---|---|---|---|
+| 说明 | 图书编号 | 书名 | 作者 | 出版社 | 图书分类 | 库存总数 | 当前借出数量 | 累计借阅次数 |
 
 ---
 
@@ -243,19 +235,15 @@ id,title,author,publisher,category,stock,borrowed,totalBorrowed
 id,name,contact,regDate,username,password,status
 ```
 
-| 字段 | 说明 | 字段 | 说明 |
-|---|---|---|---|
-| id | 读者编号 | name | 读者姓名 |
-| contact | 联系方式 | regDate | 注册日期 |
-| username | 登录账号 | password | 登录密码 |
-| status | 账号状态 |  |  |
+| 字段 | id | name | contact | regDate | username | password | status |
+|---|---|---|---|---|---|---|---|
+| 说明 | 读者编号 | 读者姓名 | 联系方式 | 注册日期 | 登录账号 | 登录密码 | 账号状态 |
 
 账号状态说明：
 
-| 状态 | 含义 |
-|---|---|
-| normal | 正常账号 |
-| disabled | 停用账号 |
+| 状态 | normal | disabled |
+|---|---|---|
+| 含义 | 正常账号 | 停用账号 |
 
 ---
 
@@ -265,12 +253,9 @@ id,name,contact,regDate,username,password,status
 bookId,bookTitle,readerId,readerName,borrowDate,dueDate,returnDate
 ```
 
-| 字段 | 说明 | 字段 | 说明 |
-|---|---|---|---|
-| bookId | 图书编号 | bookTitle | 图书名称 |
-| readerId | 读者编号 | readerName | 读者姓名 |
-| borrowDate | 借书日期 | dueDate | 应还日期 |
-| returnDate | 归还日期，空值表示未归还 |  |  |
+| 字段 | bookId | bookTitle | readerId | readerName | borrowDate | dueDate | returnDate |
+|---|---|---|---|---|---|---|---|
+| 说明 | 图书编号 | 图书名称 | 读者编号 | 读者姓名 | 借书日期 | 应还日期 | 归还日期，空值表示未归还 |
 
 ---
 
@@ -280,11 +265,9 @@ bookId,bookTitle,readerId,readerName,borrowDate,dueDate,returnDate
 time,user,role,action,detail
 ```
 
-| 字段 | 说明 | 字段 | 说明 |
-|---|---|---|---|
-| time | 操作时间 | user | 操作用户 |
-| role | 用户身份 | action | 操作类型 |
-| detail | 操作详情 |  |  |
+| 字段 | time | user | role | action | detail |
+|---|---|---|---|---|---|
+| 说明 | 操作时间 | 操作用户 | 用户身份 | 操作类型 | 操作详情 |
 
 ---
 
