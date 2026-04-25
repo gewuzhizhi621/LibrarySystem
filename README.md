@@ -184,16 +184,6 @@ LibrarySystem/
 
 ---
 
-## 📊 数据文件说明
-
-系统数据统一存储在 `data/` 目录下，采用 CSV 文件进行本地持久化保存，便于查看、修改和备份。
-
-| 文件名 | `admin_accounts.csv` | `books.csv` | `readers.csv` | `borrow_records.csv` | `logs.csv` |
-|---|---|---|---|---|---|
-| 说明 | 管理员账号数据 | 图书信息数据 | 读者信息数据 | 借阅记录数据 | 操作日志数据 |
-
----
-
 ## 🧾 CSV 字段说明
 
 ### admin_accounts.csv
