@@ -20,9 +20,6 @@
 
 ## 🖼️ 项目界面展示
 
-> 建议所有截图统一放在 `docs/images/` 目录下。  
-> 为了页面美观，建议截图尽量保持相同窗口比例，例如 `1100 × 750`。
-
 <table>
   <tr>
     <td align="center" width="50%">
@@ -328,16 +325,6 @@ time,user,role,action,detail
 
 ---
 
-## 🔑 默认账号
-
-| 身份 | 账号 | 密码 | 说明 |
-|---|---|---|---|
-| 管理员 | `admin` | `123456` | 默认管理员账号 |
-| 管理员 | `YZ1022` | `123456` | 备用管理员账号 |
-| 读者 | `reader1` | `123456` | 默认读者账号 |
-
----
-
 ## ⚙️ 运行方法
 
 ### 方法一：Visual Studio 2022 运行
@@ -431,7 +418,6 @@ x64 + Unicode + EasyXw.lib
 | 请勿删除 `data/` 目录 | 请勿删除 `Easyx/` 目录 |
 | 程序运行时需要能够读取 CSV 文件 | 数据不更新时检查程序运行目录 |
 | 中文乱码时检查 UTF-8 编码 | 背景图片不显示时检查 `picture/` 目录 |
-| 图片不显示时检查 `docs/images/` 路径 | README 图片文件名建议使用英文 |
 
 ---
 
@@ -539,152 +525,6 @@ bgImg.png
 | 运行平台 | x64 |
 | 调试工作目录 | `$(ProjectDir)` |
 
-#### 6.1 设置 Unicode 字符集
-
-路径：
-
-```text
-项目属性 -> 高级 -> 字符集
-```
-
-设置为：
-
-```text
-使用 Unicode 字符集
-```
-
-#### 6.2 使用 EasyXw.lib
-
-如果项目使用 Unicode 字符集，附加依赖项建议使用：
-
-```text
-EasyXw.lib
-```
-
-不要优先使用：
-
-```text
-EasyXa.lib
-```
-
-推荐组合：
-
-```text
-Unicode 字符集 + EasyXw.lib
-```
-
-#### 6.3 添加 /utf-8 编译选项
-
-路径：
-
-```text
-项目属性 -> C/C++ -> 命令行 -> 其他选项
-```
-
-添加：
-
-```text
-/utf-8
-```
-
-#### 6.4 源码文件保存为 UTF-8 编码
-
-如果 `.cpp` 或 `.h` 文件中有中文字符串，例如：
-
-```cpp
-L"图书管理"
-L"登录系统"
-L"请输入用户名"
-```
-
-建议将源代码文件保存为 UTF-8 编码。
-
-Visual Studio 操作方式：
-
-```text
-文件 -> 另存为 -> 保存按钮右侧小箭头 -> 编码保存 -> Unicode (UTF-8 带签名) - 代码页 65001
-```
-
-#### 6.5 中文字符串建议使用宽字符
-
-推荐写法：
-
-```cpp
-MessageBoxW(GetHWnd(), L"登录成功", L"提示", MB_OK);
-SetWindowTextW(GetHWnd(), L"DUT Library System - 图书管理");
-```
-
-不推荐写法：
-
-```cpp
-MessageBoxA(GetHWnd(), "登录成功", "提示", MB_OK);
-```
-
-不要混用 ANSI 字符串和 Unicode 字符串。
-
-#### 6.6 CSV 文件保存为 UTF-8 编码
-
-项目中的 CSV 文件建议保存为 UTF-8 编码：
-
-| CSV 文件 | CSV 文件 | CSV 文件 |
-|---|---|---|
-| books.csv | readers.csv | borrow_records.csv |
-| logs.csv | admin_accounts.csv |  |
-
-推荐使用以下工具查看和修改 CSV：
-
-| 工具 | 工具 | 工具 |
-|---|---|---|
-| VS Code | 记事本 | Notepad++ |
-
-不建议频繁使用 Excel 直接保存 CSV，因为 Excel 可能会改变文件编码，导致程序读取后出现乱码。
-
-#### 6.7 Excel 打开 CSV 后乱码
-
-这不一定是程序问题，可能是 Excel 没有正确识别 UTF-8 编码。
-
-| 步骤 | 操作 |
-|---|---|
-| 1 | 打开 Excel |
-| 2 | 点击“数据” |
-| 3 | 选择“从文本/CSV” |
-| 4 | 选择对应 CSV 文件 |
-| 5 | 文件原始格式选择 `65001: Unicode (UTF-8)` |
-| 6 | 点击加载 |
-
-#### 6.8 保存 CSV 时建议写入 UTF-8 BOM
-
-如果程序需要生成或保存 CSV 文件，建议写入 UTF-8 BOM，方便 Excel 和 Windows 软件正确识别中文。
-
-```cpp
-fout.write("\xEF\xBB\xBF", 3);
-```
-
----
-
-### 7. 图片在 GitHub README 中不显示
-
-请检查图片路径是否正确。
-
-推荐目录：
-
-```text
-docs/images/
-```
-
-README 中写法：
-
-```markdown
-![登录界面](docs/images/login.png)
-```
-
-| 注意事项 | 说明 |
-|---|---|
-| 文件名建议使用英文 | 不建议使用中文文件名 |
-| 不要出现空格 | 避免路径识别错误 |
-| 路径区分大小写 | GitHub 对路径大小写敏感 |
-| 图片必须上传到仓库 | 本地有图片但未上传时无法显示 |
-
 ---
 
 ## 🌟 后续可扩展方向
@@ -700,23 +540,7 @@ README 中写法：
 
 ---
 
-## 📄 License
-
-本项目仅用于学习、课程设计和教学演示。
-
-如需开源发布，可自行添加开源协议，推荐使用：
-
-```text
-MIT License
-```
-
----
 
 ## 👨‍💻 作者
-
-```text
-LibrarySystem
-C++ / EasyX / CSV
-```
 
 如果本项目对你有帮助，欢迎 Star ⭐
