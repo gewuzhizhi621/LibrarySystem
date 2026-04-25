@@ -188,6 +188,16 @@ LibrarySystem/
 
 ---
 
+## 📊 数据文件说明
+
+系统数据统一存储在 `data/` 目录下，采用 CSV 文件进行本地持久化保存，便于查看、修改和备份。
+
+| 文件名 | `admin_accounts.csv` | `books.csv` | `readers.csv` | `borrow_records.csv` | `logs.csv` |
+|---|---|---|---|---|---|
+| 说明 | 管理员账号数据 | 图书信息数据 | 读者信息数据 | 借阅记录数据 | 操作日志数据 |
+
+---
+
 ## 🧾 CSV 字段说明
 
 ### admin_accounts.csv
@@ -208,13 +218,9 @@ username,password,name,role
 id,title,author,publisher,category,stock,borrowed,totalBorrowed
 ```
 
-| 字段 | id | title | author | publisher |
-|---|---|---|---|---|
-| 说明 | 图书编号 | 书名 | 作者 | 出版社 |
-
-| 字段 | category | stock | borrowed | totalBorrowed |
-|---|---|---|---|---|
-| 说明 | 图书分类 | 库存总数 | 当前借出数量 | 累计借阅次数 |
+| 字段 | id | title | author | publisher | category | stock | borrowed | totalBorrowed |
+|---|---|---|---|---|---|---|---|---|
+| 说明 | 图书编号 | 书名 | 作者 | 出版社 | 图书分类 | 库存总数 | 当前借出数量 | 累计借阅次数 |
 
 ---
 
@@ -224,13 +230,9 @@ id,title,author,publisher,category,stock,borrowed,totalBorrowed
 id,name,contact,regDate,username,password,status
 ```
 
-| 字段 | id | name | contact | regDate |
-|---|---|---|---|---|
-| 说明 | 读者编号 | 读者姓名 | 联系方式 | 注册日期 |
-
-| 字段 | username | password | status |
-|---|---|---|---|
-| 说明 | 登录账号 | 登录密码 | 账号状态 |
+| 字段 | id | name | contact | regDate | username | password | status |
+|---|---|---|---|---|---|---|---|
+| 说明 | 读者编号 | 读者姓名 | 联系方式 | 注册日期 | 登录账号 | 登录密码 | 账号状态 |
 
 账号状态说明：
 
@@ -246,13 +248,9 @@ id,name,contact,regDate,username,password,status
 bookId,bookTitle,readerId,readerName,borrowDate,dueDate,returnDate
 ```
 
-| 字段 | bookId | bookTitle | readerId | readerName |
-|---|---|---|---|---|
-| 说明 | 图书编号 | 图书名称 | 读者编号 | 读者姓名 |
-
-| 字段 | borrowDate | dueDate | returnDate |
-|---|---|---|---|
-| 说明 | 借书日期 | 应还日期 | 归还日期，空值表示未归还 |
+| 字段 | bookId | bookTitle | readerId | readerName | borrowDate | dueDate | returnDate |
+|---|---|---|---|---|---|---|---|
+| 说明 | 图书编号 | 图书名称 | 读者编号 | 读者姓名 | 借书日期 | 应还日期 | 归还日期，空值表示未归还 |
 
 ---
 
@@ -262,14 +260,9 @@ bookId,bookTitle,readerId,readerName,borrowDate,dueDate,returnDate
 time,user,role,action,detail
 ```
 
-| 字段 | time | user | role | action |
-|---|---|---|---|---|
-| 说明 | 操作时间 | 操作用户 | 用户身份 | 操作类型 |
-
-| 字段 | detail |
-|---|---|
-| 说明 | 操作详情 |
-
+| 字段 | time | user | role | action | detail |
+|---|---|---|---|---|---|
+| 说明 | 操作时间 | 操作用户 | 用户身份 | 操作类型 | 操作详情 |
 ---
 
 ## ⚙️ 运行方法
@@ -295,7 +288,6 @@ time,user,role,action,detail
 | 附加包含目录 | `$(ProjectDir)Easyx\include` |
 | 附加库目录 | `$(ProjectDir)Easyx\lib\VC2015\X64` |
 | 附加依赖项 | `EasyXw.lib` |
-
 
 ---
 
@@ -339,115 +331,6 @@ time,user,role,action,detail
 | 推荐设置 | `$(ProjectDir)` |
 
 ---
-
----
-
-## ❓ 常见问题
-
-### 1. 找不到 easyx.h 或 graphics.h
-
-请检查附加包含目录是否添加：
-
-```text
-$(ProjectDir)Easyx\include
-```
-
-同时确认项目目录下存在：
-
-```text
-Easyx/include/easyx.h
-Easyx/include/graphics.h
-```
-
----
-
-### 2. 找不到 EasyXw.lib
-
-请检查附加库目录是否添加：
-
-```text
-$(ProjectDir)Easyx\lib\VC2015\X64
-```
-
-并确认目录下存在：
-
-```text
-EasyXw.lib
-EasyXa.lib
-```
-
-如果使用的是 Unicode 字符集，推荐链接：
-
-```text
-EasyXw.lib
-```
-
----
-
-### 3. 运行后没有数据
-
-请确认 `data/` 文件夹位于程序运行目录下。
-
-| 解决方法 | 说明 |
-|---|---|
-| 设置工作目录 | 将调试工作目录设置为 `$(ProjectDir)` |
-| 检查 data 目录 | 确保 `data/` 文件夹没有被删除 |
-| 检查 CSV 文件 | 确保 CSV 文件存在且文件名正确 |
-
-设置路径：
-
-```text
-项目属性 -> 调试 -> 工作目录
-```
-
----
-
-### 4. 背景图片不显示
-
-请确认 `picture/` 文件夹存在，并且其中包含：
-
-```text
-login.png
-bgImg.png
-```
-
-如果没有图片，程序会使用默认背景，不影响主要功能运行。
-
----
-
-### 5. std::filesystem 报错
-
-请确认项目 C++ 标准为：
-
-```text
-/std:c++17
-```
-
-设置路径：
-
-```text
-项目属性 -> C/C++ -> 语言 -> C++ 语言标准
-```
-
----
-
-### 6. 中文乱码问题如何解决？
-
-如果程序界面、CSV 文件或图书信息出现中文乱码，一般是 **字符集、源码编码、CSV 编码或 EasyX 库选择不一致** 导致的。
-
-| 检查项 | 推荐设置 |
-|---|---|
-| Visual Studio 字符集 | 使用 Unicode 字符集 |
-| EasyX 库 | 使用 `EasyXw.lib` |
-| C++ 标准 | C++17 |
-| 编译选项 | `/utf-8` |
-| 源码编码 | UTF-8 with BOM |
-| CSV 编码 | UTF-8 with BOM |
-| 运行平台 | x64 |
-| 调试工作目录 | `$(ProjectDir)` |
-
----
-
 
 ## 👨‍💻 作者
 
